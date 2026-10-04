@@ -58,3 +58,37 @@ Clone o projeto:
 
 ```bash
 git clone URL_DO_REPOSITORIO
+
+## 📚 Conceitos utilizados
+
+O projeto utiliza os seguintes conceitos:
+
+- TypeScript com modo strict
+- Interfaces
+- Classes e métodos
+- Encapsulamento com `private`
+- Funções tipadas
+- Arrays e objetos
+- `map()`, `find()`, `filter()` e `some()`
+- Promises
+- `async/await`
+- `try/catch`
+- Fetch API
+- JSON
+- Leitura e escrita de arquivos
+- Consumo de API externa
+
+## 🌐 API utilizada
+
+O projeto utiliza a PokeAPI para consultar os dados dos Pokémon.
+
+API:
+
+https://pokeapi.co/
+
+## 💾 Persistência
+
+Os Pokémon cadastrados são armazenados no arquivo:
+
+```text
+pc_box.json
