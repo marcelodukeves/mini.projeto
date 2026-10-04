@@ -1,39 +1,81 @@
-import { PokemonApiResponse, PokemonResumo } from "../models/Pokemon";
-import { PokemonNaoEncontradoError } from "../models/CustomErrors";
+import { readFile, writeFile } from "node:fs/promises";
+import { PokemonResumo } from "../models/Pokemon";
 
-export class PokeApiService {
+export class CatalogoPokemon {
 
-  async buscarPokemon(nomeOuId: string): Promise<PokemonResumo> {
+  private pokemons: PokemonResumo[] = [];
 
+  private arquivo = "pc_box.json";
+
+  adicionar(pokemon: PokemonResumo): boolean {
+    const existe = this.pokemons.find(
+      (item) => item.id === pokemon.id
+    );
+
+    if (existe) {
+      return false;
+    }
+
+    this.pokemons.push(pokemon);
+    return true;
+  }
+
+  listar(): PokemonResumo[] {
+    return this.pokemons;
+  }
+
+  remover(id: number): boolean {
+    const quantidadeAntes = this.pokemons.length;
+
+    this.pokemons = this.pokemons.filter(
+      (pokemon) => pokemon.id !== id
+    );
+
+    return this.pokemons.length < quantidadeAntes;
+  }
+
+  temPokemon(id: number): boolean {
+    return this.pokemons.some(
+      (pokemon) => pokemon.id === id
+    );
+  }
+
+  async salvar(): Promise<void> {
+    const dados = JSON.stringify(
+      this.pokemons,
+      null,
+      2
+    );
+
+    await writeFile(
+      this.arquivo,
+      dados,
+      "utf-8"
+    );
+  }
+
+  async carregar(): Promise<void> {
     try {
-      const resposta = await fetch(
-        `https://pokeapi.co/api/v2/pokemon/${nomeOuId.toLowerCase()}`
+      const dados = await readFile(
+        this.arquivo,
+        "utf-8"
       );
 
-      if (!resposta.ok) {
-        throw new PokemonNaoEncontradoError(nomeOuId);
+      const pokemons = JSON.parse(dados);
+
+      if (!Array.isArray(pokemons)) {
+        console.log(
+          "O pc_box.json não contém uma lista válida."
+        );
+        return;
       }
 
-      const dados: PokemonApiResponse = await resposta.json();
-
-      const pokemon: PokemonResumo = {
-        id: dados.id,
-        nome: dados.name,
-        tipos: dados.types.map((item) => item.type.name),
-        altura: dados.height,
-        peso: dados.weight
-      };
-
-      return pokemon;
+      this.pokemons = pokemons;
 
     } catch (erro) {
-
-      if (erro instanceof PokemonNaoEncontradoError) {
-        throw erro;
-      }
-
-      console.log("Erro ao consultar a PokeAPI.");
-      throw erro;
+      console.log(
+        "Não foi possível carregar o pc_box.json."
+      );
     }
   }
 }
